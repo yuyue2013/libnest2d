@@ -2,61 +2,22 @@
 
 namespace libnest2d {
 
-template PackGroup nest<NfpPlacer, FirstFitSelection, std::vector<Item>&>(
-        std::vector<Item>& cont,
-        const Box &bin,
-        Coord dist,
-        const NfpPlacer::Config& pcfg,
-        const FirstFitSelection::Config& scfg);
+template class Nester<NfpPlacer, FirstFitSelection>;
+template class Nester<BottomLeftPlacer, FirstFitSelection>;
 
-template PackGroup nest<NfpPlacer, FirstFitSelection, std::vector<Item>&>(
-    std::vector<Item>& cont,
-    const Box& bin,
-    ProgressFunction prg,
-    StopCondition scond,
-    Coord dist,
-    const NfpPlacer::Config& pcfg,
-    const FirstFitSelection::Config& scfg
-);
+template PackGroup nest(std::vector<Item>::iterator from, 
+                        std::vector<Item>::iterator to,
+                        const Box& bin,
+                        Coord dist = 0,
+                        const NfpPlacer::Config& pconf,
+                        const FirstFitSelection::Config& sconf);
 
-template PackGroup nest<NfpPlacer, FirstFitSelection, std::vector<Item>>(
-    std::vector<Item>&& cont,
-    const Box& bin,
-    Coord dist,
-    const NfpPlacer::Config& pcfg,
-    const FirstFitSelection::Config& scfg
-);
-
-template PackGroup nest<NfpPlacer, FirstFitSelection, std::vector<Item>>(
-    std::vector<Item>&& cont,
-    const Box& bin,
-    ProgressFunction prg,
-    StopCondition scond,
-    Coord dist,
-    const NfpPlacer::Config& pcfg,
-    const FirstFitSelection::Config& scfg
-);
-
-template
-PackGroup nest<NfpPlacer, FirstFitSelection, std::vector<Item>::iterator>(
-    std::vector<Item>::iterator from,
-    std::vector<Item>::iterator to,
-    const Box& bin,
-    Coord dist,
-    const NfpPlacer::Config& pcfg,
-    const FirstFitSelection::Config& scfg
-);
-
-template
-PackGroup nest<NfpPlacer, FirstFitSelection, std::vector<Item>::iterator>(
-    std::vector<Item>::iterator from,
-    std::vector<Item>::iterator to,
-    const Box& bin,
-    ProgressFunction prg,
-    StopCondition scond,
-    Coord dist,
-    const NfpPlacer::Config& pcfg,
-    const FirstFitSelection::Config& scfg
-);
-
+template PackGroup nest(std::vector<Item>::iterator from, 
+                        std::vector<Item>::iterator to,
+                        const Box& bin,
+                        ProgressFunction prg,
+                        StopCondition scond,
+                        Coord dist = 0,
+                        const NfpPlacer::Config& pconf,
+                        const FirstFitSelection::Config& sconf);
 }

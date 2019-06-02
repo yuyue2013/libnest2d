@@ -48,6 +48,9 @@ set(LIBNEST2D_SRCFILES
     ${SRC_DIR}/libnest2d/optimizer.hpp
     ${SRC_DIR}/libnest2d/utils/metaloop.hpp
     ${SRC_DIR}/libnest2d/utils/rotfinder.hpp
+    ${SRC_DIR}/libnest2d/utils/rotcalipers.hpp
+    ${SRC_DIR}/libnest2d/utils/bigint.hpp
+    ${SRC_DIR}/libnest2d/utils/rational.hpp
     ${SRC_DIR}/libnest2d/placers/placer_boilerplate.hpp
     ${SRC_DIR}/libnest2d/placers/bottomleftplacer.hpp
     ${SRC_DIR}/libnest2d/placers/nfpplacer.hpp
@@ -57,7 +60,7 @@ set(LIBNEST2D_SRCFILES
     ${SRC_DIR}/libnest2d/selections/djd_heuristic.hpp
     )
 
-set(TBB_STATIC ON)
+#set(TBB_STATIC ON)
 find_package(TBB QUIET)
 if(TBB_FOUND)
     message(STATUS "Parallelization with Intel TBB")
@@ -68,15 +71,18 @@ if(TBB_FOUND)
        target_compile_definitions(libnest2d INTERFACE -D__TBB_NO_IMPLICIT_LINKAGE)
     endif()
     # The Intel TBB library will use the std::exception_ptr feature of C++11.
-    target_compile_definitions(libnest2d INTERFACE -DTBB_USE_CAPTURED_EXCEPTION=1)
+    target_compile_definitions(libnest2d INTERFACE -DTBB_USE_CAPTURED_EXCEPTION=0)
 
-    target_link_libraries(libnest2d INTERFACE ${TBB_LIBRARIES})
+    find_package(Threads REQUIRED)
+    target_link_libraries(libnest2d INTERFACE ${TBB_LIBRARIES} ${CMAKE_DL_LIBS}
+        Threads::Threads
+        )
 else()
    find_package(OpenMP QUIET)
 
    if(OpenMP_CXX_FOUND)
        message(STATUS "Parallelization with OpenMP")
-       target_include_directories(libnest2d INTERFACE OpenMP::OpenMP_CXX)
+#       target_include_directories(libnest2d INTERFACE OpenMP::OpenMP_CXX)
        target_link_libraries(libnest2d INTERFACE OpenMP::OpenMP_CXX)
    else()
        message("Parallelization with C++11 threads")
@@ -86,9 +92,12 @@ else()
 endif()
 
 add_subdirectory(${SRC_DIR}/libnest2d/backends/${LIBNEST2D_GEOMETRIES})
-add_subdirectory(${SRC_DIR}/libnest2d/optimizers/${LIBNEST2D_OPTIMIZER})
+target_link_libraries(libnest2d INTERFACE ${LIBNEST2D_GEOMETRIES}Backend)
 
-target_sources(libnest2d INTERFACE ${LIBNEST2D_SRCFILES})
+add_subdirectory(${SRC_DIR}/libnest2d/optimizers/${LIBNEST2D_OPTIMIZER})
+target_link_libraries(libnest2d INTERFACE ${LIBNEST2D_OPTIMIZER}Optimizer)
+
+# target_sources(libnest2d INTERFACE ${LIBNEST2D_SRCFILES})
 target_include_directories(libnest2d INTERFACE ${SRC_DIR})
 
 if(NOT LIBNEST2D_HEADER_ONLY)

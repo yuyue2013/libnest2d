@@ -311,19 +311,19 @@ struct range_value<bp2d::Shapes> {
 
 namespace libnest2d { // Now the algorithms that boost can provide...
 
-namespace pointlike {
-template<>
-inline double distance(const PointImpl& p1, const PointImpl& p2 )
-{
-    return boost::geometry::distance(p1, p2);
-}
+//namespace pointlike {
+//template<>
+//inline double distance(const PointImpl& p1, const PointImpl& p2 )
+//{
+//    return boost::geometry::distance(p1, p2);
+//}
 
-template<>
-inline double distance(const PointImpl& p, const bp2d::Segment& seg )
-{
-    return boost::geometry::distance(p, seg);
-}
-}
+//template<>
+//inline double distance(const PointImpl& p, const bp2d::Segment& seg )
+//{
+//    return boost::geometry::distance(p, seg);
+//}
+//}
 
 namespace shapelike {
 // Tell libnest2d how to make string out of a ClipperPolygon object
@@ -356,13 +356,15 @@ inline double area(const PolygonImpl& shape, const PolygonTag&)
 #endif
 
 template<>
-inline bool isInside(const PointImpl& point, const PolygonImpl& shape)
+inline bool isInside(const PointImpl& point, const PolygonImpl& shape,
+                     const PointTag&, const PolygonTag&)
 {
     return boost::geometry::within(point, shape);
 }
 
 template<>
-inline bool isInside(const PolygonImpl& sh1, const PolygonImpl& sh2)
+inline bool isInside(const PolygonImpl& sh1, const PolygonImpl& sh2,
+                     const PolygonTag&, const PolygonTag&)
 {
     return boost::geometry::within(sh1, sh2);
 }
@@ -380,16 +382,9 @@ inline bool touches( const PointImpl& point, const PolygonImpl& shape)
 }
 
 #ifndef DISABLE_BOOST_BOUNDING_BOX
-template<>
-inline bp2d::Box boundingBox(const PolygonImpl& sh, const PolygonTag&)
-{
-    bp2d::Box b;
-    boost::geometry::envelope(sh, b);
-    return b;
-}
 
 template<>
-inline bp2d::Box boundingBox(const PathImpl& sh, const PolygonTag&)
+inline bp2d::Box boundingBox(const PathImpl& sh, const PathTag&)
 {
     bp2d::Box b;
     boost::geometry::envelope(sh, b);
@@ -408,9 +403,9 @@ inline bp2d::Box boundingBox<bp2d::Shapes>(const bp2d::Shapes& shapes,
 
 #ifndef DISABLE_BOOST_CONVEX_HULL
 template<>
-inline PolygonImpl convexHull(const PolygonImpl& sh, const PolygonTag&)
+inline PathImpl convexHull(const PathImpl& sh, const PathTag&)
 {
-    PolygonImpl ret;
+    PathImpl ret;
     boost::geometry::convex_hull(sh, ret);
     return ret;
 }
@@ -461,7 +456,7 @@ template<> inline std::string serialize<libnest2d::Formats::SVG>(
             auto& v = *it;
             hf.emplace_back(getX(v)*scale, getY(v)*scale);
         };
-        holes.push_back(hf);
+        holes.emplace_back(std::move(hf));
     }
 
     Polygonf poly;
